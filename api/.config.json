@@ -1,0 +1,14 @@
+{
+    "servername": "localhost",
+    "port": 3306,
+    "username": "developer",
+    "password": "f3oHCjb7",
+    "dbname": "classassistant",
+    "api": "http://localhost/api",
+    "smtpServer": "smtp.dreamhost.com",
+    "smtpPort": 465,
+    "smtpUser": "server@classassistant.art",
+    "smtpPass": "EnPc&rQB9Quwzt4t",
+    "smtpFrom": "ClassAssistant Server",
+    "smtpFromEmail": "server@classassistant.art"
+}

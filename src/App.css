@@ -1,0 +1,641 @@
+body {
+  margin: 10px;
+  padding: 10px;
+}
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.clock {
+  position: absolute;
+  right: 60px;
+  top: 5px;
+  font-size: 24px;
+  font-weight: bold;
+  background-color: black;
+  color: lime;
+  padding: 10px;
+  border-radius: 5px;
+  margin-right: 20px;
+}
+
+.logout-button {
+  position: absolute;
+  left: 10px;
+  top: 5px;
+
+}
+
+.classlist-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.container {
+  width: 45%;
+  padding: 10px;
+  border: 1px solid black;
+  border-radius: 15px;
+  margin-right: 10px;
+}
+
+.student-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.student-item {
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.student-item:hover {
+  background-color: #cdcdcd;
+}
+
+.student-details {
+  list-style-type: none;
+  padding: 0;
+}
+
+.student-details li {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+}
+
+.student-details .label {
+  font-weight: bold;
+}
+
+.student-details .value {
+  margin-left: 10px;
+}
+
+.slider {
+  width: 100%;
+  height: 25px;
+  background: #ddd;
+  outline: none;
+  opacity: 0.7;
+  transition: opacity .2s;
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  width: 50px;
+  height: 50px;
+  background: #4CAF50;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.slider::-moz-range-thumb {
+  width: 50px;
+  height: 50px;
+  background: #4CAF50;
+  cursor: pointer;
+}
+
+.slider::-ms-thumb {
+  width: 50px;
+  height: 50px;
+  background: #4CAF50;
+  cursor: pointer;
+}
+
+.buttons-together {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.notes-section {
+  margin-top: 10px;
+}
+
+.notes-section textarea {
+  width: 90%;
+  padding: 10px;
+  border: 1px solid black;
+  border-radius: 15px;
+  font-size: 16px;
+}
+
+.times-called {
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  background-color: red;
+  padding: 0px 10px 0px 10px;
+}
+
+.called-container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.green {
+  background-color: green;
+  border: 1px solid black;
+}
+
+.yellow {
+  background-color: yellow;
+  color: black;
+  border: 1px solid black;
+}
+
+.amber {
+  background-color: orange;
+  border: 1px solid black;
+}
+
+.red {
+  background-color: red;
+  border: 1px solid black;
+}
+
+
+
+a {
+  font-weight: 300;
+  color: #a7a7aa;
+  text-decoration: none;
+}
+
+a:hover {
+  color: red;
+  font-weight:bold;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: top;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  color: white;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+button:hover {
+  border-color: #646cff;
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+
+
+/******************************************* 
+
+    CONTAINERS 
+    
+*******************************************/
+.App {
+  margin: 20px;
+  padding: 20px;
+  border: 1px solid white;
+  width: 90vw;
+}
+
+.card {
+  padding: 2em;
+}
+
+.login-container {
+  margin: 0 auto;
+  top: 50%;
+  width: 50vw;
+  margin-top: 20px;
+  min-width: 320px;
+  max-width: 500px;
+  z-index: 99;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: #282c34;
+  color: white;
+  border-bottom: 1px solid #ccc;
+}
+
+/******************************************* 
+
+    TABLES 
+    
+*******************************************/
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  text-align: left;
+}
+
+th, td {
+  padding: 4px 6px;
+  border: 1px solid #ddd;
+  vertical-align: top;
+}
+
+th {
+  background-color: #f4f4f4;
+  color: #333;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tbody tr:nth-child(odd) {
+  background-color: #fff;
+}
+
+tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+thead {
+  background-color: #333;
+  color: white;
+}
+
+thead th {
+  background-color: #333;
+  color: white;
+}
+
+tbody tr td {
+  border: 1px solid #ddd;
+}
+
+.smallpad {
+  display: flex;
+  flex-direction: row;
+  padding: 2px;
+}
+
+/******************************************* 
+
+    MODAL
+    
+*******************************************/
+
+.modal {
+  display: block; 
+  position: fixed; 
+  z-index: 99; 
+  left: 0;
+  top: 0;
+  width: 100%; 
+  height: 100%; 
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5); /* Adjusted for semi-transparency */
+}
+.modal-content {
+  background-color: #fefefe;
+  margin: 3% auto; 
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; 
+  max-width: 1024px; 
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.modal-line {
+   display: flex;
+   justify-content: space-between;
+   margin-top: 5px;
+}
+
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+
+.modal-content h2 {
+  margin-top: 0;
+}
+
+.modal-content ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.modal-content ul li {
+  padding: 5px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.modal-content ul li:last-child {
+  border-bottom: none;
+}
+
+.bet-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.bet-form td {
+  padding: 8px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+}
+
+.input-group span {
+  margin-right: 0.5rem;
+}
+
+.form-group-button {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+  text-align: center;
+  padding-top: 1rem;
+}
+
+/******************************************* 
+
+  PASSWORD
+  
+*******************************************/
+
+.password-reminder {
+  position: relative;
+  font-size: 12px;
+  color: #ccc;
+  top: -15px;
+}
+
+.login-header {
+  font-size: 1.5em;
+  font-weight: bold;
+  text-align:center;
+}
+
+.login-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius:  8px;
+  -o-border-radius: 8px;
+  z-index: 99;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.form-group-button {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+}
+
+.central-overlay-spinner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; 
+}
+
+.spinner-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.spinner-text {
+  display: flex;
+  justify-content: center;
+  margin-left: 10px;
+  font-size: small;
+  padding: 20px;
+  background-color: white;
+  border: 1px solid black;
+  border-radius: 15px;
+}
+
+.no-bullet {
+  list-style-type: none;
+  padding: 0;
+}
+
+.class-card {
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  margin-bottom: 16px;
+  transition: transform 0.2s;
+}
+
+.class-card:hover {
+  transform: translateY(-5px);
+}
+
+.class-card p {
+  margin: 8px 0;
+}
+
+
+
+.classes-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.classes-table th, .classes-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.classes-table th {
+  background-color: black;
+}
+
+.classes-table tbody tr:hover {
+  background-color: #f5f5f5;
+}
+
+.label {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.right {
+  text-align: right;
+}
+
+.name {
+  font-size: 1.2em;
+}
+
+.bottomgap {
+  margin-bottom: 20px;
+}
+
+.leftgap {
+  margin-left: 20px;
+}
+
+.rightgap {
+  margin-right: 20px;
+}
+
+.topgap {
+  margin-top: 20px;
+}
+
+.smalltopgap {
+  margin-top: 10px;
+} 
+
+.click-me {
+  cursor: pointer;
+}
+
+.up-down {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 0.6em 1.1em;
+  font-size: 10px;
+  margin-right: 20px;
+}
+
+.student-list-name {
+  width: 100%;
+}
+
+.arrow-button {
+  background-color: #f0f0f0;
+  border: none;
+  color: #333;
+  padding: 5px 10px;
+  margin: 2px;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 1em;
+}
+
+.arrow-button:hover {
+  background-color: #ddd;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 48px;
+  font-weight: bold;
+  cursor: pointer;
+  position: relative;
+  top: -20px;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+}
+
+.midline {
+  display: flex;
+  transform: translateY(-70px);
+}
+
+.logo {
+  width: 50px;
+  height: 50px;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
