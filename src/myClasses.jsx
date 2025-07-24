@@ -3,6 +3,7 @@ import moment from 'moment';
 import { DatePicker, Modal, message, Spin, Switch } from 'antd';
 import axios from 'axios';
 import { Card, Button } from 'antd';
+import ShowStudents from './showStudents';
 
 function MyClasses({ config, userDetails, setShowClass }) {
   const [classes, setClasses] = useState([]);
@@ -16,6 +17,7 @@ function MyClasses({ config, userDetails, setShowClass }) {
   const [image1, setImage1] = useState(null);
   const [image2, setImage2] = useState(null);
   const [editMode, setEditMode] = useState(null);
+  const [addNewStudentDropdown, setAddNewStudentDropdown] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -109,6 +111,7 @@ function MyClasses({ config, userDetails, setShowClass }) {
       support: false,
       notes: '',
     };
+    setAddNewStudentDropdown(true);
     setCurrentClass(prevClass => {
       const updatedClass = [...prevClass, newStudent];
       setClassRecord({ ...classRecord, classData: JSON.stringify(updatedClass) }); // Update classRecord
@@ -124,6 +127,25 @@ function MyClasses({ config, userDetails, setShowClass }) {
       return newClass;
     });
   };
+
+  const setNewStudent = (studentRecord) => {
+    if (studentRecord) {
+      console.log('Selected student:', studentRecord);
+      const newStudent = {
+        firstName: studentRecord.studentFirstName,
+        lastName: studentRecord.studentLastName,
+        support: studentRecord.studentSupport || false,
+        notes: '',
+      };
+      setCurrentClass((prevClass) => {
+        const updatedClass = [...prevClass, newStudent];
+        setClassRecord({ ...classRecord, classData: JSON.stringify(updatedClass) }); // Update classRecord
+        return updatedClass;
+      });
+    } else {
+      console.warn('No student selected or invalid student record.');
+    }
+  }
 
   const handleFirstNameChange = (index, value) => {
     const updatedClass = [...currentClass];
@@ -353,6 +375,7 @@ function MyClasses({ config, userDetails, setShowClass }) {
         <div className="modal">
           <div className="modal-content">      
             <div className="modal-buttons">
+              <ShowStudents config={config} setNewStudent={setNewStudent} />
               <button onClick={addNewStudent}>Add New</button>
               <button onClick={() => saveChanges(classRecord)}>Save Changes</button>
               <button onClick={() => setShowClassModal(false)}>Cancel</button>
@@ -361,8 +384,8 @@ function MyClasses({ config, userDetails, setShowClass }) {
               <Card key={index}>
                 <div className="modal-line">
                   <span className="label name">
-                    <input type="text" onChange={(e) => handleFirstNameChange(index, e.target.value)} value={student.firstName}></input>
-                    <input type="text" onChange={(e) => handleLastNameChange(index, e.target.value)} value={student.lastName}></input></span>
+                    <input id="firstName" type="text" onChange={(e) => handleFirstNameChange(index, e.target.value)} value={student.firstName}></input>
+                    <input id="lastName" type="text" onChange={(e) => handleLastNameChange(index, e.target.value)} value={student.lastName}></input></span>
                   <span className="label">
                     Support:
                     <Switch

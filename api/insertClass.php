@@ -25,7 +25,7 @@ $checkStmt->close();
 
 if ($idExists) {
     // Update existing record
-    $query = "UPDATE tblclasses SET dateTime = ?, dateTimeUntil = ?, classNamen = ?, classPicture1 = ?, classPicture2 = ?, teacher = ?, TAs = ?, location = ?, classData = ?, classReport = ? WHERE Id = ?";
+    $query = "UPDATE tblclasses SET classSemester = ?, classDay = ?, classPeriod = ?, classNamen = ?, classPicture1 = ?, classPicture2 = ?, teacher = ?, TAs = ?, location = ?, classData = ?, classReport = ? WHERE Id = ?";
     $stmt = $mysqli->prepare($query);
 
     if (!$stmt) {
@@ -34,9 +34,10 @@ if ($idExists) {
         exit();
     }
 
-    $stmt->bind_param("ssssssssssi",
-        $receivedData['dateTime'],
-        $receivedData['dateTimeUntil'],
+    $stmt->bind_param("iiissssssssi",
+        $receivedData['classSemester'],
+        $receivedData['classDay'],
+        $receivedData['classPeriod'],
         $receivedData['classNamen'],
         $receivedData['classPicture1'],
         $receivedData['classPicture2'],
@@ -63,7 +64,7 @@ if ($idExists) {
     $stmt->close();
 } else {
     // Insert new record
-    $query = "INSERT INTO tblclasses (dateTime, dateTimeUntil, classNamen, classPicture1, classPicture2, teacher, TAs, location, classData, classReport) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $query = "INSERT INTO tblclasses (classSemester, classDay, classPeriod, classNamen, classPicture1, classPicture2, teacher, TAs, location, classData, classReport) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $mysqli->prepare($query);
 
     if (!$stmt) {
@@ -72,9 +73,10 @@ if ($idExists) {
         exit();
     }
 
-    $stmt->bind_param("ssssssssss",
-        $receivedData['dateTime'],
-        $receivedData['dateTimeUntil'],
+    $stmt->bind_param("iiissssssss",
+        $receivedData['classSemester'],
+        $receivedData['classDay'],
+        $receivedData['classPeriod'],
         $receivedData['classNamen'],
         $receivedData['classPicture1'],
         $receivedData['classPicture2'],

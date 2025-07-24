@@ -1,7 +1,7 @@
 <?php
 include 'setup.php';
 
-$query = "SELECT * FROM tblclasses WHERE teacher = ?";
+$query = "SELECT * FROM tblclasses WHERE teacher = ? ORDER BY classSemester, classDay, classPeriod";
 $stmt = $mysqli->prepare($query);
 
 if (!$stmt) {
