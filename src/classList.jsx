@@ -1,12 +1,14 @@
 import React, { useEffect, useState, useRef } from 'react';
 import './App.css';
 import axios from 'axios';
-import { message, Spin } from 'antd';
+import ShowStudents from './showStudents';
+import { Spin } from 'antd';
+
 
 const returnDiscipline = (discValue) => {
   switch (discValue) {
     case 0:
-      return ' ';
+      return '\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0'; // Non-breaking spaces for empty discipline
     case 1:
       return 'Least Invasive Intervention';
     case 2:
@@ -14,11 +16,11 @@ const returnDiscipline = (discValue) => {
     case 3:
       return 'Level 2 Warning';
     case 4:
-      return 'Remove from Class';
+      return 'Exclusion from Class';
     default:
       return 'Unknown';
   }
-}
+};
 
 const disciplineColour = (discValue) => {
   switch (discValue) {
@@ -35,79 +37,73 @@ const disciplineColour = (discValue) => {
     default:
       return 'green';
   }
-}
+};
 
-function ClassList({config, userDetails, showClass, setShowClass}) {
+function ClassList({ config, userDetails, showClass, setShowClass, setSendErrorMessage, setSendSuccessMessage }) {
   const [students, setStudents] = useState([]);
   const [groupedStudents, setGroupedStudents] = useState([]);
   const [sliderValue, setSliderValue] = useState(4); // Default value set to 4
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [currentClass, setCurrentClass] = useState(null);
-  const [messageApi, contextHolder] = message.useMessage();
+  const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString());
+  const [showEditClass, setShowEditClass] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showImage1, setShowImage1] = useState(false);
   const [showImage2, setShowImage2] = useState(false);
 
+
   useEffect(() => {
-    // Parse the class data and ensure credits, discipline, timesCalled, and notes are initialized
-    console.log('Show class:', showClass);
-    const initialStudents = JSON.parse(showClass.classData).map(student => ({
+    const initialStudents = JSON.parse(showClass.classData).map((student) => ({
       ...student,
-      credits: 0,
-      discipline: 0,
-      timesCalled: 0,
-      notes: student.notes || ''
+      credits: student.credits || 0,
+      discipline: student.discipline || 0,
+      timesCalled: student.timesCalled || 0,
+      notes: student.notes || '',
     }));
     setStudents(initialStudents);
-    setCurrentClass(showClass.Id);
     if (initialStudents.length > 0) {
       setSelectedStudent(initialStudents[0]);
     }
   }, [showClass]);
 
-
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleStudentClick = (student) => {
     setSelectedStudent(student);
   };
 
   const handleAddCredit = (firstName, lastName) => {
-    console.log('Adding credit for ' + firstName + ' ' + lastName);
-    const updatedStudents = students.map(student => {
+    const updatedStudents = students.map((student) => {
       if (student.firstName === firstName && student.lastName === lastName) {
         return { ...student, credits: student.credits + 1 };
       }
       return student;
     });
-   
     setStudents(updatedStudents);
     if (selectedStudent && selectedStudent.firstName === firstName && selectedStudent.lastName === lastName) {
       setSelectedStudent({ ...selectedStudent, credits: selectedStudent.credits + 1 });
     }
-
-    saveChanges(updatedStudents);
-
   };
 
   const handleSubtractCredit = (firstName, lastName) => {
-    console.log('Subtracting credit for ' + firstName + ' ' + lastName);
-    const updatedStudents = students.map(student => {
+    const updatedStudents = students.map((student) => {
       if (student.firstName === firstName && student.lastName === lastName) {
         return { ...student, credits: student.credits - 1 };
       }
       return student;
     });
-   
     setStudents(updatedStudents);
     if (selectedStudent && selectedStudent.firstName === firstName && selectedStudent.lastName === lastName) {
       setSelectedStudent({ ...selectedStudent, credits: selectedStudent.credits - 1 });
     }
-
-    saveChanges(updatedStudents);
-
   };
 
-  const handleCallStudent = (firstName, lastName) => {
+const handleCallStudent = (firstName, lastName) => {
     console.log('Calling student ' + firstName + ' ' + lastName);
     const updatedStudents = students.map(student => {
       if (student.firstName === firstName && student.lastName === lastName) {
@@ -147,21 +143,48 @@ function ClassList({config, userDetails, showClass, setShowClass}) {
   };
 
   const selectDiscipline = (firstName, lastName) => {
-    console.log('Disciplinary action for ' + firstName + ' ' + lastName);
-    const updatedStudents = students.map(student => {
+    const updatedStudents = students.map((student) => {
       if (student.firstName === firstName && student.lastName === lastName) {
         return { ...student, discipline: (student.discipline + 1) % 5 };
       }
       return student;
     });
-   
     setStudents(updatedStudents);
     if (selectedStudent && selectedStudent.firstName === firstName && selectedStudent.lastName === lastName) {
       setSelectedStudent({ ...selectedStudent, discipline: (selectedStudent.discipline + 1) % 5 });
     }
+  };
 
-    saveChanges(updatedStudents);
+  const setNewStudent = (newStudent) => {
+    if (newStudent) {
+      // Check if the student already exists in the list
+      const isDuplicate = students.some(
+        (student) =>
+          student.firstName === newStudent.studentFirstName &&
+          student.lastName === newStudent.studentLastName
+      );
 
+      if (isDuplicate) {
+        console.warn('Student already exists in the list:', newStudent);
+        setSendErrorMessage('Student already exists in the class list');
+        return; // Exit the function to prevent adding the duplicate
+      }
+
+      const mappedStudent = {
+        firstName: newStudent.studentFirstName, // Map studentFirstName to firstName
+        lastName: newStudent.studentLastName,   // Map studentLastName to lastName
+        support: newStudent.studentSupport || false,
+        notes: '',
+        credits: 0,
+        discipline: 0,
+        timesCalled: 0,
+      };
+      const updatedStudents = [...students, mappedStudent];
+      setStudents(updatedStudents);
+      if (!selectedStudent) {
+        setSelectedStudent(mappedStudent);
+      }
+    }
   };
 
   const generateReport = () => {
@@ -224,10 +247,10 @@ function ClassList({config, userDetails, showClass, setShowClass}) {
         },
       });
       console.log('Save response:', response.data);
-      messageApi.success('Changes saved successfully');
+      setSendSuccessMessage('Changes saved successfully');
     } catch (error) {
       console.error('Save error:', error);
-      messageApi.error('Failed to save changes');
+      setSendErrorMessage('Failed to save changes');
     } finally {
       setIsSaving(false);
     }
@@ -253,6 +276,8 @@ function ClassList({config, userDetails, showClass, setShowClass}) {
     setSelectedStudent(updatedStudents[0]);
   };
 
+
+
   return (
     <>
     {isSaving && <div className="central-overlay-spinner">
@@ -261,7 +286,6 @@ function ClassList({config, userDetails, showClass, setShowClass}) {
           Saving...
         </div>
       </div>}
-    {contextHolder}
     {students.length === 0 && <div className="loading">Loading...</div>}
     {students.length > 0 && (
       <>
@@ -354,6 +378,62 @@ function ClassList({config, userDetails, showClass, setShowClass}) {
           </div>
         </div>
       )}
+  
+      {showEditClass && (
+        <div className="modal">
+          <div className="edit-class-container">
+          <h2>Edit Class</h2>
+          <button onClick={() => setShowEditClass(false)}>Close</button>
+          <p>Add Student: <ShowStudents config={config} setNewStudent={setNewStudent} /></p>
+          <ul className="student-list-edit">
+            {[...students]
+              .sort((a, b) => (a.lastName || '').localeCompare(b.lastName || '')) // Provide fallback for lastName
+              .map((student, index) => (
+                <li
+                  key={index}
+                  className="student-item"
+                >
+                  {student.firstName} {student.lastName}{' '}
+                  <span
+                    className="delete-student"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setStudents(students.filter((s) => s !== student));
+                      if (
+                        selectedStudent &&
+                        selectedStudent.firstName === student.firstName &&
+                        selectedStudent.lastName === student.lastName
+                      ) {
+                        setSelectedStudent(null);
+                      }
+                    }}
+                    title="Delete"
+                  >
+                    {/* Trashcan SVG icon */}
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path>
+                      <line x1="10" y1="11" x2="10" y2="17"></line>
+                      <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                  </span>
+                </li>
+              ))}
+          </ul>
+          
+          </div>
+        </div>
+      )}  
+
     </>
   );
 }

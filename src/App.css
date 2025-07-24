@@ -40,6 +40,31 @@ body {
 
 }
 
+.close-button {
+  position: absolute;
+  left: 150px;
+  top: 5px;
+}
+
+.edit-class-button {
+  position: absolute;
+  left: 300px;
+  top: 5px;
+}
+
+.edit-class-container {
+  position: fixed;
+  top: 10%;
+  left: 10%;
+  width: 80%;
+  max-height: 80%; /* Limit the height to 80% of the viewport */
+  overflow-y: auto; /* Enable vertical scrolling for overflow content */
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+} 
+
 .classlist-container {
   display: flex;
   justify-content: space-between;
@@ -53,9 +78,21 @@ body {
   margin-right: 10px;
 }
 
+.delete-student {
+  color: red;
+  cursor: pointer;
+  margin-left: 30px;
+}
+
 .student-list {
   list-style-type: none;
   padding: 0;
+}
+
+.student-list-edit {
+  list-style-type: none;
+  padding: 0;
+  width: 400px;
 }
 
 .student-item {
@@ -290,8 +327,13 @@ tbody tr:nth-child(odd) {
   background-color: #fff;
 }
 
+tbody td:hover {
+  background-color: #f1f1f1; /* Change the color of the hovered cell */
+}
+
+/* Remove the row hover effect */
 tbody tr:hover {
-  background-color: #f1f1f1;
+  background-color: transparent;
 }
 
 thead {

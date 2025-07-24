@@ -65,7 +65,7 @@ const Login = ({ config, setUserDetails }) => {
               Logging in...
             </div> 
           </div>}
-      {contextHolder}
+
       <Modal
         title="Login Failed"
         centered

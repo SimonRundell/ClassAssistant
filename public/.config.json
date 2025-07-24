@@ -3,5 +3,6 @@
     "appName": "ClassAssistant",
     "appVersion": "0.0.1",
     "appDescription": "Track Class Activity",
-    "appAuthor": "Simon Rundell"
-}
+    "appAuthor": "Simon Rundell",
+    "periods": 4
+    }

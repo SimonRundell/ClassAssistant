@@ -33,7 +33,6 @@ function Register({ config, setShowRegister }) {
 
     return (
         <>
-        {contextHolder}
             <div className="login-container">
                 <div className="login-header">
                     <p>{config.appName}</p>
