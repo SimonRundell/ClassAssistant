@@ -1,7 +1,7 @@
 {
     "api": "http://localhost/api",
     "appName": "ClassAssistant",
-    "appVersion": "0.0.1",
+    "appVersion": "0.0.2",
     "appDescription": "Track Class Activity",
     "appAuthor": "Simon Rundell",
     "periods": 4

@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import MyClasses from './myClasses';
 import Login from './login';
-import ClassList from './classList';
+import ClassList from './ClassList';
+import ManageStudents from './manageStudents';
 import { message } from 'antd';
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
   const [messageApi, contextHolder] = message.useMessage();
   const [sendSuccessMessage, setSendSuccessMessage] = useState(false);
   const [sendErrorMessage, setSendErrorMessage] = useState(false);
+  const [showManageStudents, setShowManageStudents] = useState(false);
 
   useEffect(() => {
     fetch('/.config.json')
@@ -58,8 +60,14 @@ function App() {
           {userDetails ? (
             <div className="App">
             <button className="logout-button" onClick={logout}>Logout</button>
+            { userDetails.admin && (
+              <button className="close-button" onClick={() => setShowManageStudents(true)}>Manage Students</button>
+            )}
             <div className="clock">{currentTime}</div>
             <img src="/image/codemonkey.svg" alt="logo" className="logo"/>
+            {showManageStudents && (
+              <ManageStudents config={config} setShowManageStudents={setShowManageStudents} setSendSuccessMessage={setSendSuccessMessage} setSendErrorMessage={setSendErrorMessage} />
+            )}
             {!showClass && (
               <MyClasses config={config} userDetails={userDetails} setShowClass={setShowClass} setSendSuccessMessage={setSendSuccessMessage} setSendErrorMessage={setSendErrorMessage} />
             )}
@@ -67,6 +75,7 @@ function App() {
               <ClassList config={config} userDetails={userDetails} showClass={showClass} setShowClass={setShowClass} setSendSuccessMessage={setSendSuccessMessage} setSendErrorMessage={setSendErrorMessage} />
             )}
             </div>
+            
           ) : (
             <div className="App">
               <Login config={config} setUserDetails={setUserDetails} />

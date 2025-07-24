@@ -681,3 +681,57 @@ tbody tr td {
   top: 5px;
   right: 5px;
 }
+
+.form-layout {
+  display: grid;
+  grid-template-columns: 150px 1fr; /* Two columns: labels and inputs */
+  gap: 10px 20px; /* Add spacing between rows and columns */
+  margin-top: 20px;
+}
+
+.form-row {
+  display: contents; /* Ensure rows align properly in the grid */
+}
+
+.form-label {
+  font-weight: bold;
+  text-align: right;
+  padding-right: 10px;
+}
+
+.form-buttons {
+  grid-column: span 2; /* Buttons span across both columns */
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.notes-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.notes-table th,
+.notes-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.notes-table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+.small-width {
+  width: 100px; 
+}
+
+.date-width {
+  width: 150px; 
+}
+
+.blackText {
+  color: black;
+}
