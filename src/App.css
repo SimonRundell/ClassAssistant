@@ -92,7 +92,9 @@ body {
 .student-list-edit {
   list-style-type: none;
   padding: 0;
-  width: 400px;
+  width: 800px;
+  margin: 0 auto;
+  /* border: 1px solid black; */
 }
 
 .student-item {
@@ -767,4 +769,24 @@ tbody tr td {
   margin-top: -20px;
   font-size: 12px;
   color: #666;
+}
+
+.classname-title {
+  font-size: 1.5em;
+  font-weight: bold;
+  position: absolute;
+  top: 5px;
+  left: 400px;
+}
+
+.view-report-button {
+  position: absolute;
+  display: block;
+  right: 10px;
+  top: 75px;
+}
+
+.thumbnail {
+  width: 200px;
+  object-fit: cover; 
 }

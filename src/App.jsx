@@ -4,6 +4,7 @@ import MyClasses from './myClasses';
 import Login from './login';
 import ClassList from './ClassList';
 import ManageStudents from './manageStudents';
+import Report from './report';
 import { message } from 'antd';
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
   const [sendSuccessMessage, setSendSuccessMessage] = useState(false);
   const [sendErrorMessage, setSendErrorMessage] = useState(false);
   const [showManageStudents, setShowManageStudents] = useState(false);
+  const [showReport, setShowReport] = useState(false);
 
   useEffect(() => {
     fetch('/.config.json')
@@ -60,18 +62,22 @@ function App() {
           {userDetails ? (
             <div className="App">
             <button className="logout-button" onClick={logout}>Logout</button>
+            <button className="view-report-button" onClick={() => setShowReport(true)}>Progress Report</button>
             { userDetails.admin && (
               <button className="close-button" onClick={() => setShowManageStudents(true)}>Manage Students</button>
             )}
             <div className="clock">{currentTime}</div>
             <img src="/image/codemonkey.svg" alt="logo" className="logo"/>
-            {showManageStudents && (
+            {showReport && (
+              <Report config={config} setShowReport={setShowReport} setSendSuccessMessage={setSendSuccessMessage} setSendErrorMessage={setSendErrorMessage} />
+            )}
+            {!showReport && showManageStudents && (
               <ManageStudents config={config} setShowManageStudents={setShowManageStudents} setSendSuccessMessage={setSendSuccessMessage} setSendErrorMessage={setSendErrorMessage} />
             )}
-            {!showClass && (
+            {!showReport && !showClass && (
               <MyClasses config={config} userDetails={userDetails} setShowClass={setShowClass} setSendSuccessMessage={setSendSuccessMessage} setSendErrorMessage={setSendErrorMessage} />
             )}
-            {showClass && (
+            {!showReport && showClass && (
               <ClassList config={config} userDetails={userDetails} showClass={showClass} setShowClass={setShowClass} setSendSuccessMessage={setSendSuccessMessage} setSendErrorMessage={setSendErrorMessage} />
             )}
             </div>

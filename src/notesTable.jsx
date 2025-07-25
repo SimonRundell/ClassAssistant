@@ -14,7 +14,7 @@ function NotesTable({ notes }) {  // Ensure we are working with an array of note
   }
 
   // Log the parsed notes array for debugging
-  console.log('Parsed notes array:', parsedNotes);
+//   console.log('Parsed notes array:', parsedNotes);
 
   return (
     <table className="notes-table">

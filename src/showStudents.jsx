@@ -44,16 +44,21 @@ function ShowStudents({ config, setNewStudent }) {
     return <div>Loading...</div>;
   }
 
+  // Sort students by studentLastName ASC before rendering
+  const sortedStudents = [...students].sort((a, b) =>
+    a.studentLastName.localeCompare(b.studentLastName)
+  );
+
   return (
     <div>
-      {students.length === 0 ? (
+      {sortedStudents.length === 0 ? (
         <div>No students found.</div>
       ) : (
         <select value={selectedStudentID} onChange={handleSelectionChange}>
           <option value="">Select a student</option>
-          {students.map((student) => (
+          {sortedStudents.map((student) => (
             <option key={student.studentID} value={student.studentID}>
-              {student.studentID} {student.studentFirstName} {student.studentLastName}
+              {student.studentFirstName} {student.studentLastName} {student.studentID}
             </option>
           ))}
         </select>
