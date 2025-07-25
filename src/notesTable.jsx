@@ -1,5 +1,4 @@
-function NotesTable({ notes }) {
-  // Ensure we are working with an array of note objects. If `notes` is a JSON
+function NotesTable({ notes }) {  // Ensure we are working with an array of note objects. If `notes` is a JSON
   // string (as might come from a back‑end), attempt to parse it. Fallback to
   // an empty array on failure.
   let parsedNotes = [];
@@ -50,7 +49,8 @@ function NotesTable({ notes }) {
             } catch (error) {
               console.error('Error parsing dateTime:', error);
               return (
-                <tr key={`${index}`}>
+                
+                <tr key={`${note.dateTime}-${index}`}>
                   <td className="date-width">Invalid Date</td>
                   <td>{note.note}</td>
                 </tr>

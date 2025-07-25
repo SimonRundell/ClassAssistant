@@ -110,6 +110,11 @@ body {
   padding: 0;
 }
 
+.status-container {
+  display: block;
+  padding: 45px 0;
+}
+
 .student-details li {
   display: flex;
   justify-content: space-between;
@@ -167,7 +172,7 @@ body {
 }
 
 .notes-section {
-  margin-top: 10px;
+  margin-top: -75px;
 }
 
 .notes-section textarea {
@@ -734,4 +739,32 @@ tbody tr td {
 
 .blackText {
   color: black;
+}
+
+.student-image-thumb {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover; 
+}
+
+.details-image {
+  display: flex;
+  align-items: center;
+  margin-top: -150px;
+  margin-left: 350px;
+}
+
+.add-note-button {
+  font-size: 12px;
+  height: 50px;
+  padding: 5px 10px;
+  margin-top: 10px;
+}
+
+.small {
+  display:block;
+  margin-top: -20px;
+  font-size: 12px;
+  color: #666;
 }

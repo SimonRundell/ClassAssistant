@@ -152,6 +152,12 @@ return (
 
             {selectedStudent && (
                 <form onSubmit={handleUpdateStudent} className="form-layout">
+                  <div className="form-buttons">
+                    <button onClick={() => setShowEditStudent(false)}>Cancel</button>
+                    <button className="leftgap" type="submit">
+                      Save
+                    </button>
+                  </div>
                   <div className="form-row">
                     <label className="form-label">First Name:</label>
                     <input
@@ -214,7 +220,7 @@ return (
                       onChange={(checked) =>
                         setSelectedStudent({
                           ...selectedStudent,
-                          studentSupport: checked ? "Yes" : "",
+                          studentSupport: checked ? true : false,
                         })
                       }
                       checkedChildren="Yes"
@@ -280,17 +286,18 @@ return (
                   <div className="form-row">
                     <label className="form-label"></label>
                     <button
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.preventDefault(); // Prevent default form submission
                         if (selectedStudent.newNote?.trim()) {
                           const newNoteEntry = {
                             dateTime: Date.now(), // Current timestamp in epoch format
                             note: selectedStudent.newNote.trim(),
                           };
-                          setSelectedStudent({
-                            ...selectedStudent,
-                            studentNotes: [...(selectedStudent.studentNotes || []), newNoteEntry], // Append new note
+                          setSelectedStudent((prevStudent) => ({
+                            ...prevStudent,
+                            studentNotes: [...(prevStudent.studentNotes || []), newNoteEntry], // Append new note
                             newNote: "", // Clear the textarea
-                          });
+                          }));
                         }
                       }}
                     >

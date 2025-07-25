@@ -3,6 +3,7 @@ import './App.css';
 import axios from 'axios';
 import ShowStudents from './showStudents';
 import { Spin } from 'antd';
+import NotesTable from './notesTable';
 
 
 const returnDiscipline = (discValue) => {
@@ -50,6 +51,7 @@ function ClassList({ config, userDetails, showClass, setShowClass, setSendErrorM
   const [isSaving, setIsSaving] = useState(false);
   const [showImage1, setShowImage1] = useState(false);
   const [showImage2, setShowImage2] = useState(false);
+  const [studentDetailsfromRecord, setStudentDetailsfromRecord] = useState([]);
 
 
   useEffect(() => {
@@ -155,7 +157,7 @@ const handleCallStudent = (firstName, lastName) => {
     }
   };
 
-  const setNewStudent = (newStudent) => {
+    const setNewStudent = (newStudent) => {
     if (newStudent) {
       // Check if the student already exists in the list
       const isDuplicate = students.some(
@@ -163,27 +165,46 @@ const handleCallStudent = (firstName, lastName) => {
           student.firstName === newStudent.studentFirstName &&
           student.lastName === newStudent.studentLastName
       );
-
+  
       if (isDuplicate) {
         console.warn('Student already exists in the list:', newStudent);
         setSendErrorMessage('Student already exists in the class list');
         return; // Exit the function to prevent adding the duplicate
       }
-
+  
       const mappedStudent = {
-        firstName: newStudent.studentFirstName, // Map studentFirstName to firstName
-        lastName: newStudent.studentLastName,   // Map studentLastName to lastName
+        firstName: newStudent.studentFirstName,
+        lastName: newStudent.studentLastName,
+        studentID: newStudent.studentID || '',
+        newNote: '',
         support: newStudent.studentSupport || false,
-        notes: '',
+        studentImage: newStudent.studentImage || '',
+        notes: newStudent.studentNotes || '',
         credits: 0,
         discipline: 0,
         timesCalled: 0,
       };
-      const updatedStudents = [...students, mappedStudent];
-      setStudents(updatedStudents);
-      if (!selectedStudent) {
-        setSelectedStudent(mappedStudent);
-      }
+  
+      setIsSaving(true);
+  
+      // Fetch student details and update state after the API call
+      getStudentDetailsfromRecord(newStudent, (details) => {
+        if (details) {
+          Object.assign(mappedStudent, details);
+        } else {
+          console.error('Failed to fetch student details');
+        }
+  
+        console.log('Adding new student:', mappedStudent);
+  
+        const updatedStudents = [...students, mappedStudent];
+        setStudents(updatedStudents);
+        if (!selectedStudent) {
+          setSelectedStudent(mappedStudent);
+        }
+  
+        setIsSaving(false); // Ensure this is called after the API call
+      });
     }
   };
 
@@ -276,7 +297,72 @@ const handleCallStudent = (firstName, lastName) => {
     setSelectedStudent(updatedStudents[0]);
   };
 
+  const updateStudentNotes = async (studentID, notes) => {
+    setIsSaving(true);
+    const jsonData = {
+      studentNotes: JSON.stringify(notes),
+      studentID: studentID
+    };
+    console.log('Save data:', jsonData);
+    try {
+      const response = await axios.post(config.api + '/updateNote.php', jsonData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      console.log('Save response:', response.data);
+      setSendSuccessMessage('Notes updated successfully');
+    } catch (error) {
+      console.error('Save error:', error);
+      setSendErrorMessage('Failed to update notes');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
+  const getStudentDetailsfromRecord = (student, callback) => {
+    axios
+      .get(`${config.api}/getStudentDetails.php`, {
+        params: { studentID: student.studentID },
+        headers: { 'Content-Type': 'application/json' },
+      })
+      .then((response) => {
+        console.log('Student details response:', response.data);
+        setStudentDetailsfromRecord(response.data);
+        if (typeof callback === 'function') {
+          callback(response.data);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching student details:', error);
+        if (typeof callback === 'function') {
+          callback(null);
+        }
+      });
+  };
+
+  const saveClass = async (students) => {
+    setIsSaving(true);
+    const jsonData = {
+      classData: JSON.stringify(students),
+      Id: showClass.Id
+    };
+    console.log('Save data:', jsonData);
+    try {
+      const response = await axios.post(config.api + '/updateClass.php', jsonData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      console.log('Save response:', response.data);
+      setSendSuccessMessage('Class saved successfully');
+    } catch (error) {
+      console.error('Save error:', error);
+      setSendErrorMessage('Failed to save class');
+    } finally {
+      setIsSaving(false);
+    }
+  };  
 
   return (
     <>
@@ -286,13 +372,20 @@ const handleCallStudent = (firstName, lastName) => {
           Saving...
         </div>
       </div>}
-    {students.length === 0 && <div className="loading">Loading...</div>}
+    {students.length === 0 && (
+      <div className="loading">
+        <h1>Please add students to this class.</h1>
+          <button onClick={()=>setShowEditClass(true)}>Edit Class</button>
+          <button className="leftgap" onClick={()=>setShowClass(null)}>Close</button>
+      </div>
+    )}
     {students.length > 0 && (
       <>
     <div className="header topgap">
       <button onClick={generateReport}>Generate Report</button>
       <button className="leftgap" onClick={()=>setShowImage1(true)}>Seating Plan 1</button>
       <button className="leftgap" onClick={()=>setShowImage2(true)}>Seating Plan 2</button>
+      <button className="leftgap" onClick={()=>setShowEditClass(true)}>Edit Class</button>
       <button className="leftgap" onClick={()=>setShowClass(null)}>Close</button>
     </div>
     <div className="classlist-container">
@@ -308,6 +401,7 @@ const handleCallStudent = (firstName, lastName) => {
             >
               <span className="called-container">
                 <span className="student-list-name">{student.firstName} {student.lastName}</span>
+                
                 <span className="up-down">
                   <span className="up-down">
                     <button className="arrow-button" onClick={(e) => { e.stopPropagation(); moveStudentUp(index); }}>
@@ -329,25 +423,91 @@ const handleCallStudent = (firstName, lastName) => {
         {selectedStudent && (
           <div className="student-info">
             <h3>{selectedStudent.firstName} {selectedStudent.lastName}</h3>
+            <span className="small">Student ID:{selectedStudent.studentID}</span>
+            <div className="buttons-together">
+              <button onClick={()=>handleAddCredit(selectedStudent.firstName, selectedStudent.lastName)}>+</button>
+              <button onClick={()=>handleSubtractCredit(selectedStudent.firstName, selectedStudent.lastName)}>-</button>
+              <button className="button-wide" onClick={()=>handleCallStudent(selectedStudent.firstName, selectedStudent.lastName)}>Call</button>
+            </div>
+            <div className="details-image">
+                      
+                       <img
+                       className="student-image-thumb"
+                      src={
+                        selectedStudent.studentImage
+                          ? selectedStudent.studentImage.startsWith('data:image')
+                            ? selectedStudent.studentImage // Already a data URL
+                            : `data:image/png;base64,${selectedStudent.studentImage}` // Assume base64 string
+                          : "/image/user.png"
+                      }
+                      alt="Student Picture"
+                    />
+                      
+                    </div>
+            <div className="status-container">
             <ul className="student-details">
               <li><span className="label">Credits:</span> <span className="value">{selectedStudent.credits}</span></li>
               <li><span className="label">Discipline:</span> <span onClick={()=>selectDiscipline(selectedStudent.firstName, selectedStudent.lastName)} className="value"><span className={`times-called click-me ${disciplineColour(selectedStudent.discipline)}`}>{returnDiscipline(selectedStudent.discipline)}</span></span></li>
               <li><span className="label">Support:</span> <span className="value">{selectedStudent.support ? 'Yes' : 'No'}</span></li>
               <li><span className="label">Times Called:</span> <span className="value">{selectedStudent.timesCalled}</span></li>
             </ul>
+            </div>
             <div className="notes-section">
-              <h4>Notes:</h4>
-              <textarea
-                value={selectedStudent.notes}
-                onChange={(e) => handleNotesChange(e, selectedStudent.firstName, selectedStudent.lastName)}
-                className="notes"
+              <div className="classlist-container">
+                <h4>Notes:</h4>
+                <button
+      className="add-note-button"
+      onClick={(e) => {
+        e.preventDefault(); // Prevent default form submission
+        if (selectedStudent.newNote?.trim()) {
+          const newNoteEntry = {
+            dateTime: Date.now(), // Current timestamp in epoch format
+            note: selectedStudent.newNote.trim(),
+          };
+          setSelectedStudent((prevStudent) => ({
+            ...prevStudent,
+            studentNotes: [...(prevStudent.studentNotes || []), newNoteEntry], // Append new note
+            newNote: "", // Clear the textarea
+          }));
+          updateStudentNotes(selectedStudent.studentID, [...(selectedStudent.studentNotes || []), newNoteEntry]);
+        }
+      }}
+    >
+      Add Note
+    </button>
+              </div>
+                    <textarea
+                      value={selectedStudent.newNote || ""} // Temporary field for new note
+                      onChange={(e) =>
+                        setSelectedStudent({
+                          ...selectedStudent,
+                          newNote: e.target.value, // Store the new note separately
+                        })
+                      }
+                      rows={2}
+                    />    
+              <NotesTable
+                key={selectedStudent?.studentID}
+                notes={(() => {
+                  let parsedNotes = [];
+                  if (selectedStudent?.studentNotes) {
+                    const rawNotes = selectedStudent.studentNotes;
+                    if (Array.isArray(rawNotes)) {
+                      parsedNotes = rawNotes;
+                    } else if (typeof rawNotes === "string" && rawNotes.trim().length > 0) {
+                      try {
+                        parsedNotes = JSON.parse(rawNotes);
+                      } catch (e) {
+                        console.error("Failed to parse studentNotes JSON:", e);
+                        parsedNotes = [];
+                      }
+                    }
+                  }
+                  return parsedNotes;
+                })()}
               />
             </div>
-            <div className="buttons-together">
-              <button onClick={()=>handleAddCredit(selectedStudent.firstName, selectedStudent.lastName)}>+</button>
-              <button onClick={()=>handleSubtractCredit(selectedStudent.firstName, selectedStudent.lastName)}>-</button>
-              <button className="button-wide" onClick={()=>handleCallStudent(selectedStudent.firstName, selectedStudent.lastName)}>Call</button>
-            </div>
+            
           </div>
         )}
       </div>
@@ -384,6 +544,7 @@ const handleCallStudent = (firstName, lastName) => {
           <div className="edit-class-container">
           <h2>Edit Class</h2>
           <button onClick={() => setShowEditClass(false)}>Close</button>
+          <button className="leftgap" onClick={() => saveClass(students)}>Save Class</button>
           <p>Add Student: <ShowStudents config={config} setNewStudent={setNewStudent} /></p>
           <ul className="student-list-edit">
             {[...students]
