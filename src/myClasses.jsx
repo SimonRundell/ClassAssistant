@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import moment from 'moment';
-import { DatePicker, Modal, message, Spin, Switch } from 'antd';
+import { Spin, } from 'antd';
 import axios from 'axios';
-import { Card, Button } from 'antd';
-import ShowStudents from './showStudents';
+
 
 function MyClasses({ config, userDetails, setShowClass, setSendErrorMessage, setSendSuccessMessage}) {
   const [classes, setClasses] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [messageApi, contextHolder] = message.useMessage();
   const [updatedData, setUpdatedData] = useState(false);
 
   useEffect(() => {

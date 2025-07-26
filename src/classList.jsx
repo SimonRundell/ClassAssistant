@@ -950,8 +950,8 @@ const handleCallStudent = (firstName, lastName) => {
       {showCloseDialog && (
         <div className="modal">
           <div className="modal-content">
-            <h3>Confirm Action</h3>
-            <p>Do you want to save the data before closing?</p>
+            <h3>End of Lesson</h3>
+            <p>Do you want to save the data for this lesson before closing?</p>
             <button onClick={() => confirmCloseClass(true)}>Save and Close</button>
             <button className="leftgap" onClick={() => confirmCloseClass(false)}>Close Without Saving</button>
           </div>
