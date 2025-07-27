@@ -1,31 +1,17 @@
 <?php
 include 'setup.php';
 
-// Check if the ID already exists
-$checkQuery = "SELECT Id FROM tblclasses WHERE Id = ?";
-$checkStmt = $mysqli->prepare($checkQuery);
+// Ensure all required fields are set, even if missing in the payload
+$receivedData['classPicture1'] = $receivedData['classPicture1'] ?? null;
+$receivedData['classPicture2'] = $receivedData['classPicture2'] ?? null;
+$receivedData['TAs'] = $receivedData['TAs'] ?? null;
 
-if (!$checkStmt) {
-    log_info("Prepare failed: " . $mysqli->error);
-    send_response("Prepare failed: " . $mysqli->error, 500);
-    exit();
-}
-
-$checkStmt->bind_param("i", $receivedData['Id']);
-
-if (!$checkStmt->execute()) {
-    log_info("Execute failed: " . $checkStmt->error);
-    send_response("Execute failed: " . $checkStmt->error, 500);
-    exit();
-}
-
-$checkStmt->store_result();
-$idExists = $checkStmt->num_rows > 0;
-$checkStmt->close();
+// Check if the ID is undefined, null, or empty
+$idExists = isset($receivedData['Id']) && !empty($receivedData['Id']);
 
 if ($idExists) {
     // Update existing record
-    $query = "UPDATE tblclasses SET classSemester = ?, classDay = ?, classPeriod = ?, classNamen = ?, classPicture1 = ?, classPicture2 = ?, teacher = ?, TAs = ?, location = ?, classData = ?, classReport = ? WHERE Id = ?";
+    $query = "UPDATE tblclasses SET classSemester = ?, classDay = ?, classPeriod = ?, classNamen = ?, classPicture1 = ?, classPicture2 = ?, teacher = ?, TAs = ?, location = ?, classData = ? WHERE Id = ?";
     $stmt = $mysqli->prepare($query);
 
     if (!$stmt) {
@@ -34,7 +20,7 @@ if ($idExists) {
         exit();
     }
 
-    $stmt->bind_param("iiissssssssi",
+    $stmt->bind_param("iiisssssssi",
         $receivedData['classSemester'],
         $receivedData['classDay'],
         $receivedData['classPeriod'],
@@ -45,7 +31,6 @@ if ($idExists) {
         $receivedData['TAs'],
         $receivedData['location'],
         $receivedData['classData'],
-        $receivedData['classReport'],
         $receivedData['Id']
     );
 
@@ -64,7 +49,7 @@ if ($idExists) {
     $stmt->close();
 } else {
     // Insert new record
-    $query = "INSERT INTO tblclasses (classSemester, classDay, classPeriod, classNamen, classPicture1, classPicture2, teacher, TAs, location, classData, classReport) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $query = "INSERT INTO tblclasses (classSemester, classDay, classPeriod, classNamen, classPicture1, classPicture2, teacher, TAs, location, classData) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $mysqli->prepare($query);
 
     if (!$stmt) {
@@ -73,7 +58,7 @@ if ($idExists) {
         exit();
     }
 
-    $stmt->bind_param("iiissssssss",
+    $stmt->bind_param("iiisssssss",
         $receivedData['classSemester'],
         $receivedData['classDay'],
         $receivedData['classPeriod'],
@@ -83,8 +68,7 @@ if ($idExists) {
         $receivedData['teacher'],
         $receivedData['TAs'],
         $receivedData['location'],
-        $receivedData['classData'],
-        $receivedData['classReport']
+        $receivedData['classData']
     );
 
     if (!$stmt->execute()) {

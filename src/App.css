@@ -735,6 +735,10 @@ tbody tr td {
   width: 100px; 
 }
 
+.medium-width {
+  width: 300px; 
+}
+
 .date-width {
   width: 150px; 
 }

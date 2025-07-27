@@ -30,7 +30,7 @@ function Report({ config, setShowReport, setSendErrorMessage, setSendSuccessMess
                             const noteText = note.note || '';
 
                             // Use regex to extract class name, credits, discipline, and times called
-                            const classNameMatch = noteText.match(/-\s(.+?):/);
+                            const classNameMatch = noteText.match(/\d{2}\/\d{2}\/\d{4}\s(.+?)\sLESSON SUMMARY:/);
                             const creditsMatch = noteText.match(/Credits:\s(\d+)/);
                             const disciplineMatch = noteText.match(/Discipline:\s([^,]+)/);
                             const timesCalledMatch = noteText.match(/Times Called:\s(\d+)/);

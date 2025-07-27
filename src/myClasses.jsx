@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Spin, } from 'antd';
 import axios from 'axios';
+import ShowStudents from './showStudents';
 
 
 function MyClasses({ config, userDetails, setShowClass, setSendErrorMessage, setSendSuccessMessage}) {
   const [classes, setClasses] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [updatedData, setUpdatedData] = useState(false);
+  const [showEditClass, setShowEditClass] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [students, setStudents] = useState([]);
+  const [studentDetailsfromRecord, setStudentDetailsfromRecord] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,6 +43,7 @@ function MyClasses({ config, userDetails, setShowClass, setSendErrorMessage, set
   
 
   const showClass = (item) => {
+    console.log('showClass called with item:', item);
     setShowClass(item);
   }
 
@@ -67,8 +74,28 @@ function MyClasses({ config, userDetails, setShowClass, setSendErrorMessage, set
     );
   }
 
+const handleCellClick = (periodIndex, dayIndex, classItem) => {
+    console.log(`Clicked cell at Period ${periodIndex + 1}, Day ${dayIndex + 1}`);
+    if (classItem) {
+      showClass(classItem); // Show class details
+    } else {
+      setShowClass({
+        classSemester: 1, // Default semester
+        classDay: dayIndex + 1, // Pre-populate day
+        classPeriod: periodIndex + 1, // Pre-populate period
+      });
+      setShowEditClass(true); // Open edit class modal
+    }
+  };
+
   return (
     <>
+        {isSaving && <div className="central-overlay-spinner">
+          <div className="spinner-text">
+            <Spin size="large" />&nbsp;&nbsp;
+              Saving...
+            </div>
+          </div>}
       {Object.keys(groupedClasses).length > 0 ? (
         <div>
           <h1>Timetable for {userDetails.teacherName} ({userDetails.teacherCode})</h1>
@@ -91,7 +118,10 @@ function MyClasses({ config, userDetails, setShowClass, setSendErrorMessage, set
                     <tr key={periodIndex}>
                       <td>Period {periodIndex + 1}</td>
                       {period.map((classItem, dayIndex) => (
-                        <td key={dayIndex} onClick={() => showClass(classItem)}>
+                        <td
+                          key={dayIndex}
+                          onClick={() => handleCellClick(periodIndex, dayIndex, classItem)}
+                        >
                           {classItem ? (
                             <div className="class-item">
                               <strong>{classItem.classNamen}</strong>
@@ -101,7 +131,7 @@ function MyClasses({ config, userDetails, setShowClass, setSendErrorMessage, set
                               {classItem.teacher}
                             </div>
                           ) : (
-                            <div className="free-period">Free</div>
+                            <div className="free-period" onClick={() => setShowEditClass(true)}>Free</div>
                           )}
                         </td>
                       ))}
@@ -115,6 +145,7 @@ function MyClasses({ config, userDetails, setShowClass, setSendErrorMessage, set
       ) : (
         <div>No classes found.</div>
       )}
+
     </>
   );
 }

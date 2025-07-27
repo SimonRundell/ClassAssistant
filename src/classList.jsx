@@ -53,51 +53,46 @@ function ClassList({ config, userDetails, showClass, setShowClass, setSendErrorM
   const [showImage2, setShowImage2] = useState(false);
   const [studentDetailsfromRecord, setStudentDetailsfromRecord] = useState([]);
   const [showCloseDialog, setShowCloseDialog] = useState(false);
+  const [fetchTrigger, setFetchTrigger] = useState(false);
 
 
   useEffect(() => {
     const fetchStudentDetails = async () => {
-      const initialStudents = JSON.parse(showClass.classData).map((student) => ({
-        ...student,
-        credits: 0, // Initialize to zero
-        discipline: 0, // Initialize to zero
-        timesCalled: 0, // Initialize to zero
-        notes: student.notes || '',
-      }));
+      let initialStudents = [];
+      try {
+        const jsonData = { class_pk: showClass.Id };
+        console.log('jsonData:', jsonData);
+        const response = await axios.post(`${config.api}/getStudentsOfClass.php`, jsonData, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
 
-      // Overwrite each record in initialStudents with data from the student record, excluding credits, discipline, and timesCalled
-      await Promise.all(
-        initialStudents.map(async (student, idx) => {
-          try {
-            const details = await axios
-              .get(`${config.api}/getStudentDetails.php`, {
-                params: { studentID: student.studentID },
-                headers: { 'Content-Type': 'application/json' },
-              })
-              .then((res) => res.data);
-
-            if (details) {
-              Object.assign(initialStudents[idx], {
-                ...details,
-                credits: 0, // Ensure credits remain zero
-                discipline: 0, // Ensure discipline remains zero
-                timesCalled: 0, // Ensure timesCalled remains zero
-              });
-            }
-          } catch (error) {
-            console.error('Failed to fetch student details for', student.studentID, error);
-          }
-        })
-      );
+        const parsedMessage = JSON.parse(response.data.message);
+        initialStudents = parsedMessage.map(student => ({
+          ...student,
+          credits: 0,
+          discipline: 0,
+          timesCalled: 0,
+          studentNotes: student.studentNotes ? JSON.parse(student.studentNotes) : [],
+        }));
+      } catch (error) {
+        console.error('Error fetching students of class:', error);
+        setSendErrorMessage('Failed to fetch students of class');
+        return;
+      }
 
       setStudents(initialStudents);
+
+      console.log('Initial students fetched:', initialStudents);
+
       if (initialStudents.length > 0) {
         setSelectedStudent(initialStudents[0]);
       }
     };
 
     fetchStudentDetails();
-  }, [showClass]);
+  }, [showClass, fetchTrigger]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -107,31 +102,32 @@ function ClassList({ config, userDetails, showClass, setShowClass, setSendErrorM
   }, []);
 
   const handleStudentClick = (student) => {
+    console.log('Selected student:', student);
     setSelectedStudent(student);
   };
 
   const handleAddCredit = (firstName, lastName) => {
     const updatedStudents = students.map((student) => {
-      if (student.firstName === firstName && student.lastName === lastName) {
+      if (student.studentFirstName === firstName && student.studentLastName === lastName) {
         return { ...student, credits: student.credits + 1 };
       }
       return student;
     });
     setStudents(updatedStudents);
-    if (selectedStudent && selectedStudent.firstName === firstName && selectedStudent.lastName === lastName) {
+    if (selectedStudent && selectedStudent.studentFirstName === firstName && selectedStudent.studentLastName === lastName) {
       setSelectedStudent({ ...selectedStudent, credits: selectedStudent.credits + 1 });
     }
   };
 
   const handleSubtractCredit = (firstName, lastName) => {
     const updatedStudents = students.map((student) => {
-      if (student.firstName === firstName && student.lastName === lastName) {
+      if (student.studentFirstName === firstName && student.studentLastName === lastName) {
         return { ...student, credits: student.credits - 1 };
       }
       return student;
     });
     setStudents(updatedStudents);
-    if (selectedStudent && selectedStudent.firstName === firstName && selectedStudent.lastName === lastName) {
+    if (selectedStudent && selectedStudent.studentFirstName === firstName && selectedStudent.studentLastName === lastName) {
       setSelectedStudent({ ...selectedStudent, credits: selectedStudent.credits - 1 });
     }
   };
@@ -139,18 +135,18 @@ function ClassList({ config, userDetails, showClass, setShowClass, setSendErrorM
 const handleCallStudent = (firstName, lastName) => {
     console.log('Calling student ' + firstName + ' ' + lastName);
     const updatedStudents = students.map(student => {
-      if (student.firstName === firstName && student.lastName === lastName) {
+      if (student.studentFirstName === firstName && student.studentLastName === lastName) {
         return { ...student, timesCalled: student.timesCalled + 1 };
       }
       return student;
     });
 
-    const calledStudent = updatedStudents.find(student => student.firstName === firstName && student.lastName === lastName);
-    const remainingStudents = updatedStudents.filter(student => student.firstName !== firstName || student.lastName !== lastName);
+    const calledStudent = updatedStudents.find(student => student.studentFirstName === firstName && student.studentLastName === lastName);
+    const remainingStudents = updatedStudents.filter(student => student.studentFirstName !== firstName || student.studentLastName !== lastName);
 
     setStudents([...remainingStudents, calledStudent]);
 
-    if (selectedStudent && selectedStudent.firstName === firstName && selectedStudent.lastName === lastName) {
+    if (selectedStudent && selectedStudent.studentFirstName === firstName && selectedStudent.studentLastName === lastName) {
       setSelectedStudent({ ...selectedStudent, timesCalled: selectedStudent.timesCalled + 1 });
     }
 
@@ -160,84 +156,70 @@ const handleCallStudent = (firstName, lastName) => {
 
   };
 
-  // const handleNotesChange = (event, firstName, lastName) => {
-  //   console.log('Updating notes for ' + firstName + ' ' + lastName);
-  //   const updatedStudents = students.map(student => {
-  //     if (student.firstName === firstName && student.lastName === lastName) {
-  //       return { ...student, notes: event.target.value };
-  //     }
-  //     return student;
-  //   });
-   
-  //   setStudents(updatedStudents);
-  //   if (selectedStudent && selectedStudent.firstName === firstName && selectedStudent.lastName === lastName) {
-  //     setSelectedStudent({ ...selectedStudent, notes: event.target.value });
-  //   }
-  // };
-
   const selectDiscipline = (firstName, lastName) => {
+    console.log('Selecting discipline for student:', firstName, lastName);
     const updatedStudents = students.map((student) => {
-      if (student.firstName === firstName && student.lastName === lastName) {
+      if (student.studentFirstName === firstName && student.studentLastName === lastName) {
         return { ...student, discipline: (student.discipline + 1) % 5 };
       }
       return student;
     });
     setStudents(updatedStudents);
-    if (selectedStudent && selectedStudent.firstName === firstName && selectedStudent.lastName === lastName) {
+    if (selectedStudent && selectedStudent.studentFirstName === firstName && selectedStudent.studentLastName === lastName) {
       setSelectedStudent({ ...selectedStudent, discipline: (selectedStudent.discipline + 1) % 5 });
     }
   };
 
-    const setNewStudent = (newStudent) => {
-    if (newStudent) {
-      // Check if the student already exists in the list
-      const isDuplicate = students.some(
-        (student) =>
-          student.firstName === newStudent.studentFirstName &&
-          student.lastName === newStudent.studentLastName
-      );
+  //   const setNewStudent = (newStudent) => {
+  //   if (newStudent) {
+  //     // Check if the student already exists in the list
+  //     const isDuplicate = students.some(
+  //       (student) =>
+  //         student.studentFirstName === newStudent.studentFirstName &&
+  //         student.studentLastName === newStudent.studentLastName
+  //     );
   
-      if (isDuplicate) {
-        console.warn('Student already exists in the list:', newStudent);
-        setSendErrorMessage('Student already exists in the class list');
-        return; // Exit the function to prevent adding the duplicate
-      }
+  //     if (isDuplicate) {
+  //       console.warn('Student already exists in the list:', newStudent);
+  //       setSendErrorMessage('Student already exists in the class list');
+  //       return; // Exit the function to prevent adding the duplicate
+  //     }
   
-      const mappedStudent = {
-        firstName: newStudent.studentFirstName,
-        lastName: newStudent.studentLastName,
-        studentID: newStudent.studentID || '',
-        newNote: '',
-        support: newStudent.studentSupport || false,
-        studentImage: newStudent.studentImage || '',
-        notes: newStudent.studentNotes || '',
-        credits: 0,
-        discipline: 0,
-        timesCalled: 0,
-      };
+  //     const mappedStudent = {
+  //       firstName: newStudent.studentFirstName,
+  //       lastName: newStudent.studentLastName,
+  //       studentID: newStudent.studentID || '',
+  //       newNote: '',
+  //       support: newStudent.studentSupport || false,
+  //       studentImage: newStudent.studentImage || '',
+  //       notes: newStudent.studentNotes || '',
+  //       credits: 0,
+  //       discipline: 0,
+  //       timesCalled: 0,
+  //     };
   
-      setIsSaving(true);
+  //     setIsSaving(true);
   
-      // Fetch student details and update state after the API call
-      getStudentDetailsfromRecord(newStudent, (details) => {
-        if (details) {
-          Object.assign(mappedStudent, details);
-        } else {
-          console.error('Failed to fetch student details');
-        }
+  //     // Fetch student details and update state after the API call
+  //     getStudentDetailsfromRecord(newStudent, (details) => {
+  //       if (details) {
+  //         Object.assign(mappedStudent, details);
+  //       } else {
+  //         console.error('Failed to fetch student details');
+  //       }
   
-        console.log('Adding new student:', mappedStudent);
+  //       console.log('Adding new student:', mappedStudent);
   
-        const updatedStudents = [...students, mappedStudent];
-        setStudents(updatedStudents);
-        if (!selectedStudent) {
-          setSelectedStudent(mappedStudent);
-        }
+  //       const updatedStudents = [...students, mappedStudent];
+  //       setStudents(updatedStudents);
+  //       if (!selectedStudent) {
+  //         setSelectedStudent(mappedStudent);
+  //       }
   
-        setIsSaving(false); // Ensure this is called after the API call
-      });
-    }
-  };
+  //       setIsSaving(false); // Ensure this is called after the API call
+  //     });
+  //   }
+  // };
 
   const generateReport = () => {
     const reportWindow = window.open('', '', 'width=800,height=600');
@@ -334,7 +316,7 @@ const handleCallStudent = (firstName, lastName) => {
       studentNotes: JSON.stringify(notes),
       studentID: studentID
     };
-    console.log('Save data:', jsonData);
+    console.log('Updating notes with:', jsonData);
     try {
       const response = await axios.post(config.api + '/updateNote.php', jsonData, {
         headers: {
@@ -355,7 +337,6 @@ const handleCallStudent = (firstName, lastName) => {
           return {
             ...student,
             studentNotes: updatedNotes,
-            notes: JSON.stringify(updatedNotes),
           };
         }
         return student;
@@ -365,7 +346,6 @@ const handleCallStudent = (firstName, lastName) => {
         setSelectedStudent(prev => ({
           ...prev,
           studentNotes: updatedNotes,
-          notes: JSON.stringify(updatedNotes),
         }));
       }
     } catch (error) {
@@ -376,25 +356,37 @@ const handleCallStudent = (firstName, lastName) => {
     }
   };
 
-  const getStudentDetailsfromRecord = (student, callback) => {
-    axios
-      .get(`${config.api}/getStudentDetails.php`, {
-        params: { studentID: student.studentID },
-        headers: { 'Content-Type': 'application/json' },
-      })
-      .then((response) => {
-        console.log('Student details response:', response.data);
-        setStudentDetailsfromRecord(response.data);
-        if (typeof callback === 'function') {
-          callback(response.data);
-        }
-      })
-      .catch((error) => {
-        console.error('Error fetching student details:', error);
-        if (typeof callback === 'function') {
-          callback(null);
-        }
+  const setNewStudent = (newStudent) => {
+    if (newStudent) {
+      // Check if the student already exists in the list
+      const isDuplicate = students.some(
+        (student) =>
+          student.studentFirstName === newStudent.studentFirstName &&
+          student.studentLastName === newStudent.studentLastName
+      );  
+      if (isDuplicate) {
+        console.warn('Student already exists in the list:', newStudent);
+        setSendErrorMessage('Student already exists in the class list');
+        return; // Exit the function to prevent adding the duplicate
+      }
+
+      const jsonData = { class_pk: showClass.Id, student_pk: newStudent.studentID };
+      console.log('jsonData to add student:', jsonData);
+      axios.post(`${config.api}/addStudentToClass.php`, jsonData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).then((response) => {
+        console.log('Add student response:', response.data);
+        setStudents((prevStudents) => [...prevStudents, newStudent]);
+        setSelectedStudent(newStudent);
+        setSendSuccessMessage('Student added successfully');
+        setFetchTrigger(!fetchTrigger); // Trigger re-fetch of students
+      }).catch((error) => {
+        console.error('Add student error:', error);
+        setSendErrorMessage('Failed to add student');
       });
+    }
   };
 
   const saveClass = async (students) => {
@@ -408,7 +400,6 @@ const handleCallStudent = (firstName, lastName) => {
       classPicture2: showClass.classPicture2,
       teacher: showClass.teacher,
       location: showClass.location,
-      classData: JSON.stringify(students),
       Id: showClass.Id
     };
     console.log('Save data:', jsonData);
@@ -428,82 +419,38 @@ const handleCallStudent = (firstName, lastName) => {
     }
   }; 
 
-  const saveNotes = async (studentID, notes) => {
-    setIsSaving(true);
-    const jsonData = {
-      studentNotes: JSON.stringify(notes),
-      studentID: studentID
-    };
-    console.log('Save data:', jsonData);
-    try {
-      const response = await axios.post(config.api + '/updateNote.php', jsonData, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      console.log('Save response:', response.data);
-      setSendSuccessMessage('Notes updated successfully');
-    } catch (error) {
-      console.error('Save error:', error);
-      setSendErrorMessage('Failed to update notes');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-  
-  const closeOutClass = () => {
-  const today = new Date();
-  const formattedDate = today.toLocaleDateString('en-GB'); // dd/mm/yyyy
-  const lessonName = showClass.classNamen || '';
-  const updatedStudents = students.map(student => {
-    const noteEntry = {
-      dateTime: Date.now(),
-      note: `${formattedDate} - ${lessonName}: Credits: ${student.credits}, Discipline: ${returnDiscipline(student.discipline)}, Times Called: ${student.timesCalled}`
-    };
-
-    // Parse existing notes if needed
-    let existingNotes = [];
-    if (Array.isArray(student.studentNotes)) {
-      existingNotes = student.studentNotes;
-    } else if (typeof student.studentNotes === "string" && student.studentNotes.trim().length > 0) {
-      try {
-        existingNotes = JSON.parse(student.studentNotes);
-      } catch {
-        existingNotes = [];
-      }
-    }
-
-    // Merge existing notes with the new note entry
-    const mergedNotes = [...existingNotes, noteEntry];
-
-    return {
-      ...student,
-      studentNotes: mergedNotes, // Update studentNotes with merged data
-      notes: JSON.stringify(mergedNotes) // Ensure notes field is consistent
-    };
-  });
-
-  // Update state and backend
-  setStudents(updatedStudents);
-  if (selectedStudent) {
-    const updatedSelected = updatedStudents.find(s => s.studentID === selectedStudent.studentID);
-    setSelectedStudent(updatedSelected);
-  }
-  updatedStudents.forEach(student => {
-    updateStudentNotes(student.studentID, student.studentNotes);
-  });
-  setShowClass(null);
-
-  };
-    
-
   const handleCloseClass = () => {
     setShowCloseDialog(true);
   };
 
+  const closeOutClass = async () => {
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString('en-GB');
+    for (const student of students) {
+      const summaryNote = `${formattedDate} ${showClass.classNamen} LESSON SUMMARY: Credits: ${student.credits}, Discipline: ${returnDiscipline(student.discipline)}, Times Called: ${student.timesCalled}`;
+      // Prepare notes array
+      let notesArr = [];
+      if (Array.isArray(student.studentNotes)) {
+        notesArr = [...student.studentNotes];
+      } else if (typeof student.studentNotes === "string" && student.studentNotes.trim().length > 0) {
+        try {
+          notesArr = JSON.parse(student.studentNotes);
+        } catch {
+          notesArr = [];
+        }
+      }
+      notesArr.push({
+        dateTime: Date.now(),
+        note: summaryNote,
+      });
+      await updateStudentNotes(student.studentID, notesArr);
+    }
+    setSendSuccessMessage("Lesson summary notes added for all students.");
+  }
+
   const confirmCloseClass = (saveChanges) => {
     if (saveChanges) {
-      saveClass(students); // Save the class data
+      closeOutClass();
     }
     setShowCloseDialog(false); // Close the dialog
     setShowClass(null); // Close the class view
@@ -521,7 +468,7 @@ const handleCallStudent = (firstName, lastName) => {
       <div className="loading">
         <h1>Please add students to this class.</h1>
           <button onClick={()=>setShowEditClass(true)}>Edit Class</button>
-          <button className="leftgap" onClick={()=>closeOutClass()}>Close</button>
+          <button className="leftgap" onClick={()=>setShowClass(null)}>Close</button>
       </div>
     )}
     {students.length > 0 && (
@@ -546,8 +493,7 @@ const handleCallStudent = (firstName, lastName) => {
               onClick={() => handleStudentClick(student)}
             >
               <span className="called-container">
-                <span className="student-list-name">{student.firstName} {student.lastName}</span>
-                
+                <span className="student-list-name">{student.studentFirstName} {student.studentLastName}</span>
                 <span className="up-down">
                   <span className="up-down">
                     <button className="arrow-button" onClick={(e) => { e.stopPropagation(); moveStudentUp(index); }}>
@@ -568,12 +514,12 @@ const handleCallStudent = (firstName, lastName) => {
         <h2>Student Details</h2>
         {selectedStudent && (
           <div className="student-info">
-            <h3>{selectedStudent.firstName} {selectedStudent.lastName}</h3>
+            <h3>{selectedStudent.studentFirstName} {selectedStudent.studentLastName}</h3>
             <span className="small">Student ID:{selectedStudent.studentID}</span>
             <div className="buttons-together">
-              <button onClick={()=>handleAddCredit(selectedStudent.firstName, selectedStudent.lastName)}>+</button>
-              <button onClick={()=>handleSubtractCredit(selectedStudent.firstName, selectedStudent.lastName)}>-</button>
-              <button className="button-wide" onClick={()=>handleCallStudent(selectedStudent.firstName, selectedStudent.lastName)}>Call</button>
+              <button onClick={()=>handleAddCredit(selectedStudent.studentFirstName, selectedStudent.studentLastName)}>+</button>
+              <button onClick={()=>handleSubtractCredit(selectedStudent.studentFirstName, selectedStudent.studentLastName)}>-</button>
+              <button className="button-wide" onClick={()=>handleCallStudent(selectedStudent.studentFirstName, selectedStudent.studentLastName)}>Call</button>
             </div>
             <div className="details-image">
                       
@@ -593,9 +539,10 @@ const handleCallStudent = (firstName, lastName) => {
             <div className="status-container">
             <ul className="student-details">
               <li><span className="label">Credits:</span> <span className="value">{selectedStudent.credits}</span></li>
-              <li><span className="label">Discipline:</span> <span onClick={()=>selectDiscipline(selectedStudent.firstName, selectedStudent.lastName)} className="value"><span className={`times-called click-me ${disciplineColour(selectedStudent.discipline)}`}>{returnDiscipline(selectedStudent.discipline)}</span></span></li>
-              <li><span className="label">Support:</span> <span className="value">{selectedStudent.support ? 'Yes' : 'No'}</span></li>
+              <li><span className="label">Discipline:</span> <span onClick={()=>selectDiscipline(selectedStudent.studentFirstName, selectedStudent.studentLastName)} className="value"><span className={`times-called click-me ${disciplineColour(selectedStudent.discipline)}`}>{returnDiscipline(selectedStudent.discipline)}</span></span></li>
+              <li><span className="label">Support:</span> <span className="value">{selectedStudent.studentSupport ? 'Yes' : 'No'}</span></li>
               <li><span className="label">Times Called:</span> <span className="value">{selectedStudent.timesCalled}</span></li>
+              <li><span className="label">Personal Tutor:</span> <span className="value">{selectedStudent.studentTutor}</span></li>
             </ul>
             </div>
             <div className="notes-section">
@@ -897,14 +844,14 @@ const handleCallStudent = (firstName, lastName) => {
                     <div className="form-layout">
               <ul className="student-list-edit">
                 {[...students]
-                  .sort((a, b) => (a.lastName || '').localeCompare(b.lastName || '')) // Provide fallback for lastName
+                  .sort((a, b) => (a.lastName || '').localeCompare(b.studentLastName || '')) // Provide fallback for lastName
                   .map((student, index) => (
                     <li
                       key={index}
                       className="student-item form-row"
                     >
                       <span className="leftgap">
-                        {student.firstName} {student.lastName}
+                        {student.studentFirstName} {student.studentLastName}
                       </span>
                       <span
                         className="delete-student"
@@ -913,8 +860,8 @@ const handleCallStudent = (firstName, lastName) => {
                           setStudents(students.filter((s) => s !== student));
                           if (
                             selectedStudent &&
-                            selectedStudent.firstName === student.firstName &&
-                            selectedStudent.lastName === student.lastName
+                            selectedStudent.studentFirstName === student.studentFirstName &&
+                            selectedStudent.studentLastName === student.studentLastName
                           ) {
                             setSelectedStudent(null);
                           }

@@ -5,6 +5,7 @@ function ShowStudents({ config, setNewStudent }) {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedStudentID, setSelectedStudentID] = useState(""); // Track the selected student ID
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     setLoading(true);
@@ -49,19 +50,36 @@ function ShowStudents({ config, setNewStudent }) {
     a.studentLastName.localeCompare(b.studentLastName)
   );
 
+  // Filter students by firstName or lastName based on searchTerm
+  const filteredStudents = sortedStudents.filter(
+    (student) =>
+      student.studentFirstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.studentLastName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <div>
-      {sortedStudents.length === 0 ? (
+    <div className="medium-width">
+      <input
+        type="text"
+        
+        placeholder="Search then dropdown"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        style={{ marginBottom: "8px", width: "100%" }}
+      />
+      {filteredStudents.length === 0 ? (
         <div>No students found.</div>
       ) : (
-        <select value={selectedStudentID} onChange={handleSelectionChange}>
-          <option value="">Select a student</option>
-          {sortedStudents.map((student) => (
-            <option key={student.studentID} value={student.studentID}>
-              {student.studentFirstName} {student.studentLastName} {student.studentID}
-            </option>
-          ))}
-        </select>
+        <div>
+          <select value={selectedStudentID} onChange={handleSelectionChange}>
+            <option value="">Select a student</option>
+            {filteredStudents.map((student) => (
+              <option key={student.studentID} value={student.studentID}>
+                {student.studentFirstName} {student.studentLastName} {student.studentID}
+              </option>
+            ))}
+          </select>
+        </div>
       )}
     </div>
   );
